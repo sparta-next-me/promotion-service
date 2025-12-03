@@ -11,6 +11,7 @@ import org.nextme.promotion_service.promotion.presentation.dto.PromotionJoinResp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +34,14 @@ public class PromotionParticipationService {
 	@return 참여 결과
 	 */
 	@Transactional(readOnly = true)
-	public PromotionJoinResponse joinPromotion(UUID promotionId, Long userId, String ipAddress) {
+	public PromotionJoinResponse joinPromotion(UUID promotionId, Long userId, HttpServletRequest httpRequest) {
+
+		// 클라이언트 IP 추출
+		String ipAddress = getClientIp(httpRequest);
+
+		log.info("프로모션 참여 요청 - promotionId: {}, userId: {}, ip: {}", promotionId, userId, ipAddress);
+
+
 		// 1. 프로모션 조회
 		Promotion promotion = promotionRepository.findById(promotionId)
 			.orElseThrow(PromotionErrorCode.PROMOTION_NOT_FOUND::toException);
@@ -53,7 +61,7 @@ public class PromotionParticipationService {
 		Long queueSize = queueService.getQueueSize(promotionId);
 		int maxQueueSize = promotion.getTotalStock() * QUEUE_SIZE_MULTIPLIER;
 
-		if (queueSize > maxQueueSize) {
+		if (queueSize >= maxQueueSize) {
 			// 대기열 초과 시 롤백
 			queueService.removeFromJoinedSet(promotionId, userId);
 			throw PromotionErrorCode.PROMOTION_QUEUE_FULL.toException();
@@ -67,5 +75,33 @@ public class PromotionParticipationService {
 		Long position = queueSize + 1;
 		log.info("프로모션 참여 성공 - promotionId: {}, userId: {}, position: {}", promotionId, userId, position);
 		return PromotionJoinResponse.success("대기열에 진입했습니다.", position);
+	}
+
+	// 클라이언트 IP 주소 추출
+	private String getClientIp(HttpServletRequest request) {
+		String ip = request.getHeader("X-Forwarded-For");
+
+		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("Proxy-Client-IP");
+		}
+		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("WL-Proxy-Client-IP");
+		}
+		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_CLIENT_IP");
+		}
+		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+		}
+		if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+			ip = request.getRemoteAddr();
+		}
+
+		// X-Forwarded-For에 여러 IP가 있을 경우 첫 번째 IP 추출
+		if (ip != null && ip.contains(",")) {
+			ip = ip.split(",")[0].trim();
+		}
+
+		return ip;
 	}
 }
