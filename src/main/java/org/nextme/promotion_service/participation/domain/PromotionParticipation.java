@@ -4,14 +4,18 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.nextme.common.jpa.BaseEntity;
+import org.nextme.promotion_service.promotion.domain.Promotion;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,9 +31,10 @@ public class PromotionParticipation extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 
-	// 참여한 프로모션 ID
-	@Column(nullable = false)
-	private UUID promotionId;
+	// 참여한 프로모션
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "promotion_id", nullable = false)
+	private Promotion promotion;
 
 	// 참여한 사용자 ID
 	@Column(nullable = false)
@@ -63,13 +68,13 @@ public class PromotionParticipation extends BaseEntity {
 
 	// 당첨자 생성
 	public static PromotionParticipation createWinner(
-		UUID promotionId,
+		Promotion promotion,
 		Long userId,
 		String ipAddress,
 		Long position
 	) {
 		PromotionParticipation participation = new PromotionParticipation();
-		participation.promotionId = promotionId;
+		participation.promotion = promotion;
 		participation.userId = userId;
 		participation.ipAddress = ipAddress;
 		participation.participatedAt = LocalDateTime.now();
@@ -80,12 +85,12 @@ public class PromotionParticipation extends BaseEntity {
 
 	// 탈락자 생성
 	public static PromotionParticipation createLoser(
-		UUID promotionId,
+		Promotion promotion,
 		Long userId,
 		String ipAddress
 	) {
 		PromotionParticipation participation = new PromotionParticipation();
-		participation.promotionId = promotionId;
+		participation.promotion = promotion;
 		participation.userId = userId;
 		participation.ipAddress = ipAddress;
 		participation.participatedAt = LocalDateTime.now();
