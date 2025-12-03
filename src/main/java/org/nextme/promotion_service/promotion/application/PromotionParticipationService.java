@@ -38,9 +38,9 @@ public class PromotionParticipationService {
 
 		// 클라이언트 IP 추출
 		String ipAddress = getClientIp(httpRequest);
+		String userAgent = httpRequest.getHeader("User-Agent");
 
 		log.info("프로모션 참여 요청 - promotionId: {}, userId: {}, ip: {}", promotionId, userId, ipAddress);
-
 
 		// 1. 프로모션 조회
 		Promotion promotion = promotionRepository.findById(promotionId)
@@ -68,7 +68,7 @@ public class PromotionParticipationService {
 		}
 
 		// 5. 대기열 등록
-		String queueData = String.format("%d:%s:%s", userId, ipAddress, LocalDateTime.now());
+		String queueData = String.format("%d:%s:%s:%s", userId, ipAddress, userAgent, LocalDateTime.now());
 		queueService.enqueue(promotionId, queueData);
 
 		// 6. 성공 응답
