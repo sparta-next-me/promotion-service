@@ -71,12 +71,14 @@ public class PromotionParticipation extends BaseEntity {
 		Promotion promotion,
 		Long userId,
 		String ipAddress,
+		String userAgent,
 		Long position
 	) {
 		PromotionParticipation participation = new PromotionParticipation();
 		participation.promotion = promotion;
 		participation.userId = userId;
 		participation.ipAddress = ipAddress;
+		participation.userAgent = userAgent;
 		participation.participatedAt = LocalDateTime.now();
 		participation.status = ParticipationStatus.WON;
 		participation.queuePosition = position;
@@ -87,12 +89,14 @@ public class PromotionParticipation extends BaseEntity {
 	public static PromotionParticipation createLoser(
 		Promotion promotion,
 		Long userId,
-		String ipAddress
+		String ipAddress,
+		String userAgent
 	) {
 		PromotionParticipation participation = new PromotionParticipation();
 		participation.promotion = promotion;
 		participation.userId = userId;
 		participation.ipAddress = ipAddress;
+		participation.userAgent = userAgent;
 		participation.participatedAt = LocalDateTime.now();
 		participation.status = ParticipationStatus.LOST;
 		return participation;
