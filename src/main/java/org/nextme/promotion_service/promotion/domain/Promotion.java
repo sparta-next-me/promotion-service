@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "p_promotion_participation")
+@Table(name = "p_promotion")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Promotion extends BaseEntity {
