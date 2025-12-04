@@ -36,8 +36,9 @@ public class PromotionWorker {
 	@Scheduled(fixedRate = 1000)
 	@Transactional
 	public void processQueue() {
-		// 임시 특정 프로모션 처리
-		log.debug("워커 실행 - 대기열 처리 시작");
+		// 임시: 테스트용 프로모션 ID 하드코딩
+		UUID testPromotionId = UUID.fromString("e503dfc2-a7cd-473a-b661-d32da707e1ef");
+		processPromotionQueue(testPromotionId);
 	}
 
 	public void processPromotionQueue(UUID promotionId) {
