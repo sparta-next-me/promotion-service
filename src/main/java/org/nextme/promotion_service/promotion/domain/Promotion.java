@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -51,6 +52,17 @@ public class Promotion extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private PromotionStatus status;
+
+	@Builder
+	public Promotion(String name, LocalDateTime startTime, LocalDateTime endTime,
+		Integer totalStock, Integer pointAmount, PromotionStatus status) {
+		this.name = name;
+		this.startTime = startTime;
+		this.endTime = endTime;
+		this.totalStock = totalStock;
+		this.pointAmount = pointAmount;
+		this.status = status != null ? status : PromotionStatus.SCHEDULED;
+	}
 
 	// 현재 프로모션이 진행 중인지 확인
 	public boolean isActive() {

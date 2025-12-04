@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.nextme.promotion_service.participation.domain.PromotionParticipation;
 import org.nextme.promotion_service.participation.infrastructure.persistence.PromotionParticipationRepository;
 import org.nextme.promotion_service.promotion.domain.Promotion;
+import org.nextme.promotion_service.promotion.domain.PromotionStatus;
 import org.nextme.promotion_service.promotion.infrastructure.persistence.PromotionRepository;
 import org.nextme.promotion_service.promotion.infrastructure.redis.PromotionQueueService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,9 +37,27 @@ public class PromotionWorker {
 	@Scheduled(fixedRate = 1000)
 	@Transactional
 	public void processQueue() {
-		// 임시: 테스트용 프로모션 ID 하드코딩
-		UUID testPromotionId = UUID.fromString("e503dfc2-a7cd-473a-b661-d32da707e1ef");
-		processPromotionQueue(testPromotionId);
+		// ACTIVE 상태의 모든 프로모션 조회
+		List<Promotion> activePromotions = promotionRepository.findByStatus(PromotionStatus.ACTIVE);
+
+		if (activePromotions.isEmpty()) {
+			return;
+		}
+
+		log.debug("활성 프로모션 {} 개 처리 시작", activePromotions.size());
+
+		// 각 프로모션의 큐 처리
+		for (Promotion promotion : activePromotions) {
+			try {
+				Long queueSize = queueService.getQueueSize(promotion.getId());
+				if (queueSize > 0) {
+					log.debug("프로모션 {} 큐 처리 - 대기 {}명", promotion.getName(), queueSize);
+					processPromotionQueue(promotion.getId());
+				}
+			} catch (Exception e) {
+				log.error("프로모션 큐 처리 중 오류 - promotionId: {}, error: {}", promotion.getId(), e.getMessage(), e);
+			}
+		}
 	}
 
 	public void processPromotionQueue(UUID promotionId) {

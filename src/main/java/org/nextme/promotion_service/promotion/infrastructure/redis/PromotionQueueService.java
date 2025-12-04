@@ -90,4 +90,15 @@ public class PromotionQueueService {
 		}
 		return Long.parseLong(value.toString());
 	}
+
+	/*
+	총 참여자 수 조회
+	@param promotionId 프로모션 ID
+	@return 총 참여자 수 (joined set 크기)
+	 */
+	public Long getParticipantCount(UUID promotionId) {
+		String joinedKey = RedisKeyGenerator.joinedKey(promotionId);
+		Long count = redisTemplate.opsForSet().size(joinedKey);
+		return count != null ? count : 0L;
+	}
 }
