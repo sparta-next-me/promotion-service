@@ -32,7 +32,7 @@ public class ParticipationQueryService {
 	@return 참여 결과
 	 */
 	@Transactional(readOnly = true)
-	public ParticipationResultResponse getParticipationResult(UUID promotionId, Long userId) {
+	public ParticipationResultResponse getParticipationResult(UUID promotionId, UUID userId) {
 		Promotion promotion = promotionRepository.findById(promotionId)
 			.orElseThrow(PromotionErrorCode.PROMOTION_NOT_FOUND::toException);
 

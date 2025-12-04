@@ -14,7 +14,7 @@ public class PromotionWinnerEvent {
 
 	private UUID promotionId;		// 프로모션 ID
 	private String promotionName;	// 프로모션 이름
-	private Long userId;			// 사용자 ID
+	private UUID userId;			// 사용자 ID
 	private Integer pointAmount;	// 지급할 포인트 금액
 	private Long queuePosition;		// 당첨 순번
 	private LocalDateTime wonAt;	// 당첨 시각
@@ -22,7 +22,7 @@ public class PromotionWinnerEvent {
 	public static PromotionWinnerEvent of(
 		UUID promotionId,
 		String promotionName,
-		Long userId,
+		UUID userId,
 		Integer pointAmount,
 		Long queuePosition
 	) {

@@ -34,7 +34,7 @@ public class PromotionParticipationService {
 	@return 참여 결과
 	 */
 	@Transactional(readOnly = true)
-	public PromotionJoinResponse joinPromotion(UUID promotionId, Long userId, HttpServletRequest httpRequest) {
+	public PromotionJoinResponse joinPromotion(UUID promotionId, UUID userId, HttpServletRequest httpRequest) {
 
 		// 클라이언트 IP 추출
 		String ipAddress = getClientIp(httpRequest);
@@ -68,7 +68,7 @@ public class PromotionParticipationService {
 		}
 
 		// 5. 대기열 등록
-		String queueData = String.format("%d:%s:%s:%s", userId, ipAddress, userAgent, LocalDateTime.now());
+		String queueData = String.format("%s:%s:%s:%s", userId, ipAddress, userAgent, LocalDateTime.now());
 		queueService.enqueue(promotionId, queueData);
 
 		// 6. 성공 응답

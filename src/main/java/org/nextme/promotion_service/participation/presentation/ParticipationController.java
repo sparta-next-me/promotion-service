@@ -40,7 +40,7 @@ public class ParticipationController {
 		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId,
 		@Parameter(description = "사용자 ID", required = true)
-		@PathVariable Long userId
+		@PathVariable UUID userId
 	) {
 		ParticipationResultResponse response = participationQueryService.getParticipationResult(promotionId, userId);
 		return ResponseEntity.ok(CustomResponse.onSuccess(response));

@@ -40,9 +40,9 @@ public class PromotionQueueService {
 	@param userId 사용자 ID
 	@return true : 신규 참여, false : 중복 참여
 	 */
-	public boolean addToJoinedSet(UUID promotionId, Long userId) {
+	public boolean addToJoinedSet(UUID promotionId, UUID userId) {
 		String joinedKey = RedisKeyGenerator.joinedKey(promotionId);
-		Long result = redisTemplate.opsForSet().add(joinedKey, userId);
+		Long result = redisTemplate.opsForSet().add(joinedKey, userId.toString());
 		return result != null && result == 1;
 	}
 
@@ -51,9 +51,9 @@ public class PromotionQueueService {
 	@param promotionId 프로모션 ID
 	@param userId 사용자 ID
 	 */
-	public void removeFromJoinedSet(UUID promotionId, Long userId) {
+	public void removeFromJoinedSet(UUID promotionId, UUID userId) {
 		String joinedKey = RedisKeyGenerator.joinedKey(promotionId);
-		redisTemplate.opsForSet().remove(joinedKey, userId);
+		redisTemplate.opsForSet().remove(joinedKey, userId.toString());
 	}
 
 	/*

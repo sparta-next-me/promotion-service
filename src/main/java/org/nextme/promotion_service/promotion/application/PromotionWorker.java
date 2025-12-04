@@ -84,14 +84,14 @@ public class PromotionWorker {
 				break; // 큐가 비었으면 종료
 			}
 
-			// 데이터 파싱 : "userId:ipAddress:timestamp"
+			// 데이터 파싱 : "userId:ipAddress:userAgent:timestamp"
 			String[] parts = queueData.split(":");
 			if (parts.length < 3) {
 				log.warn("잘못된 큐 데이터 형식 - data: {}", queueData);
 				continue;
 			}
 
-			Long userId = Long.parseLong(parts[0]);
+			UUID userId = UUID.fromString(parts[0]);
 			String ipAddress = parts[1];
 			String userAgent = parts[2];
 
