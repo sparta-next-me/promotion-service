@@ -14,7 +14,10 @@ public enum PromotionErrorCode {
 	PROMOTION_NOT_FOUND(HttpStatus.NOT_FOUND, "PROMOTION_NOT_FOUND", "존재하지 않는 프로모션입니다"),
 	PROMOTION_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "PROMOTION_NOT_AVAILABLE", "참여 가능한 프로모션이 아닙니다."),
 	PROMOTION_ALREADY_JOINED(HttpStatus.CONFLICT, "PROMOTION_ALREADY_JOINED", "이미 참여하셨습니다"),
-	PROMOTION_QUEUE_FULL(HttpStatus.TOO_MANY_REQUESTS, "PROMOTION_QUEUE_FULL", "대기 인원이 초과되었습니다.");
+	PROMOTION_QUEUE_FULL(HttpStatus.TOO_MANY_REQUESTS, "PROMOTION_QUEUE_FULL", "대기 인원이 초과되었습니다."),
+
+	// 참여 관련
+	PARTICIPATION_NOT_FOUND(HttpStatus.NOT_FOUND, "PARTICIPATION_NOT_FOUND", "참여 기록을 찾을 수 없습니다");
 
 	private final HttpStatus httpStatus;
 	private final String code;
