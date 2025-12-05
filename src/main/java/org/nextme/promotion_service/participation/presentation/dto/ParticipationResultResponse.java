@@ -11,7 +11,7 @@ public record ParticipationResultResponse(
 	UUID participationId,
 	UUID promotionId,
 	String promotionName,
-	Long userId,
+	UUID userId,
 	ParticipationStatus status,
 	Long queuePosition,      // 당첨 순번 (당첨자만)
 	LocalDateTime participatedAt,

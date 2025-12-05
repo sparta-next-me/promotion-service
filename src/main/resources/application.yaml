@@ -18,6 +18,12 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+
 management:
   endpoints:
     web:
@@ -35,3 +41,13 @@ management:
       show-details: always
     prometheus:
       enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

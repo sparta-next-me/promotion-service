@@ -8,6 +8,8 @@ import org.nextme.promotion_service.participation.domain.PromotionParticipation;
 import org.nextme.promotion_service.participation.infrastructure.persistence.PromotionParticipationRepository;
 import org.nextme.promotion_service.promotion.domain.Promotion;
 import org.nextme.promotion_service.promotion.domain.PromotionStatus;
+import org.nextme.promotion_service.promotion.domain.event.PromotionWinnerEvent;
+import org.nextme.promotion_service.promotion.infrastructure.event.PromotionEventPublisher;
 import org.nextme.promotion_service.promotion.infrastructure.persistence.PromotionRepository;
 import org.nextme.promotion_service.promotion.infrastructure.redis.PromotionQueueService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,6 +31,7 @@ public class PromotionWorker {
 	private final PromotionQueueService queueService;
 	private final PromotionRepository promotionRepository;
 	private final PromotionParticipationRepository participationRepository;
+	private final PromotionEventPublisher eventPublisher;
 
 	// 배치 크기
 	private static final int BATCH_SIZE = 100;
@@ -81,14 +84,14 @@ public class PromotionWorker {
 				break; // 큐가 비었으면 종료
 			}
 
-			// 데이터 파싱 : "userId:ipAddress:timestamp"
+			// 데이터 파싱 : "userId:ipAddress:userAgent:timestamp"
 			String[] parts = queueData.split(":");
 			if (parts.length < 3) {
 				log.warn("잘못된 큐 데이터 형식 - data: {}", queueData);
 				continue;
 			}
 
-			Long userId = Long.parseLong(parts[0]);
+			UUID userId = UUID.fromString(parts[0]);
 			String ipAddress = parts[1];
 			String userAgent = parts[2];
 
@@ -101,6 +104,16 @@ public class PromotionWorker {
 				// 당첨
 				participation = PromotionParticipation.createWinner(promotion, userId, ipAddress, userAgent, winnerCount);
 				log.info("당첨 - promotionId: {}, userId: {}, position: {}", promotionId, userId, winnerCount);
+
+				// 당첨 이벤트 발행
+				PromotionWinnerEvent event = PromotionWinnerEvent.of(
+					promotion.getId(),
+					promotion.getName(),
+					userId,
+					promotion.getPointAmount(),
+					winnerCount
+				);
+				eventPublisher.publishWinnerEvent(event);
 			} else {
 				// 탈락
 				participation = PromotionParticipation.createLoser(promotion, userId, ipAddress, userAgent);

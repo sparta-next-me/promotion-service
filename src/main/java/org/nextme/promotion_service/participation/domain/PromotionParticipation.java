@@ -38,7 +38,7 @@ public class PromotionParticipation extends BaseEntity {
 
 	// 참여한 사용자 ID
 	@Column(nullable = false)
-	private Long userId;
+	private UUID userId;
 
 	// 참여 시각
 	@Column(nullable = false)
@@ -69,7 +69,7 @@ public class PromotionParticipation extends BaseEntity {
 	// 당첨자 생성
 	public static PromotionParticipation createWinner(
 		Promotion promotion,
-		Long userId,
+		UUID userId,
 		String ipAddress,
 		String userAgent,
 		Long position
@@ -88,7 +88,7 @@ public class PromotionParticipation extends BaseEntity {
 	// 탈락자 생성
 	public static PromotionParticipation createLoser(
 		Promotion promotion,
-		Long userId,
+		UUID userId,
 		String ipAddress,
 		String userAgent
 	) {

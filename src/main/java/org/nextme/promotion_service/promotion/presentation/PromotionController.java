@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/v1/promotions")
 @RequiredArgsConstructor
+@Tag(name = "Promotion", description = "프로모션 관리 API")
 public class PromotionController {
 
 	private final PromotionService promotionService;
@@ -39,6 +43,7 @@ public class PromotionController {
 	@param request 프로모션 생성 요청
 	@return 생성된 프로모션 정보
 	 */
+	@Operation(summary = "프로모션 생성", description = "새로운 프로모션을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<CustomResponse<PromotionResponse>> createPromotion(
 		@Valid @RequestBody PromotionCreateRequest request
@@ -52,8 +57,10 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 프로모션 정보
 	 */
+	@Operation(summary = "프로모션 조회", description = "프로모션 ID로 상세 정보를 조회합니다.")
 	@GetMapping("/{promotionId}")
 	public ResponseEntity<CustomResponse<PromotionResponse>> getPromotion(
+		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId
 	) {
 		PromotionResponse response = promotionService.getPromotion(promotionId);
@@ -65,8 +72,10 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 시작된 프로모션 정보
 	 */
+	@Operation(summary = "프로모션 시작", description = "프로모션을 ACTIVE 상태로 변경합니다.")
 	@PatchMapping("/{promotionId}/start")
 	public ResponseEntity<CustomResponse<PromotionResponse>> startPromotion(
+		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId
 	) {
 		PromotionResponse response = promotionService.startPromotion(promotionId);
@@ -78,8 +87,10 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 종료된 프로모션 정보
 	 */
+	@Operation(summary = "프로모션 종료", description = "프로모션을 ENDED 상태로 변경합니다.")
 	@PatchMapping("/{promotionId}/end")
 	public ResponseEntity<CustomResponse<PromotionResponse>> endPromotion(
+		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId
 	) {
 		PromotionResponse response = promotionService.endPromotion(promotionId);
@@ -91,8 +102,10 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 참여 현황 정보
 	 */
+	@Operation(summary = "프로모션 참여 현황 조회", description = "대기열 크기, 참여자 수, 당첨자 수 등의 현황을 조회합니다.")
 	@GetMapping("/{promotionId}/status")
 	public ResponseEntity<CustomResponse<PromotionStatusResponse>> getPromotionStatus(
+		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId
 	) {
 		PromotionStatusResponse response = promotionService.getPromotionStatus(promotionId);
@@ -108,6 +121,7 @@ public class PromotionController {
 	 */
 	@PostMapping("/{promotionId}/join")
 	public ResponseEntity<CustomResponse<PromotionJoinResponse>> joinPromotion(
+		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId,
 		@Valid @RequestBody PromotionJoinRequest request,
 		HttpServletRequest httpRequest
