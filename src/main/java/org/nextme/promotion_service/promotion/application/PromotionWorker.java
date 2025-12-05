@@ -11,6 +11,7 @@ import org.nextme.promotion_service.promotion.domain.PromotionStatus;
 import org.nextme.promotion_service.promotion.domain.event.PromotionWinnerEvent;
 import org.nextme.promotion_service.promotion.infrastructure.event.PromotionEventPublisher;
 import org.nextme.promotion_service.promotion.infrastructure.persistence.PromotionRepository;
+import org.nextme.promotion_service.promotion.infrastructure.redis.PromotionCacheService;
 import org.nextme.promotion_service.promotion.infrastructure.redis.PromotionQueueService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class PromotionWorker {
 	private final PromotionRepository promotionRepository;
 	private final PromotionParticipationRepository participationRepository;
 	private final PromotionEventPublisher eventPublisher;
+	private final PromotionCacheService cacheService;
 
 	// 배치 크기
 	private static final int BATCH_SIZE = 100;
@@ -41,7 +43,7 @@ public class PromotionWorker {
 	@Transactional
 	public void processQueue() {
 		// ACTIVE 상태의 모든 프로모션 조회
-		List<Promotion> activePromotions = promotionRepository.findByStatus(PromotionStatus.ACTIVE);
+		List<UUID> activePromotions = cacheService.getActivePromotionIds();
 
 		if (activePromotions.isEmpty()) {
 			return;
@@ -50,23 +52,22 @@ public class PromotionWorker {
 		log.debug("활성 프로모션 {} 개 처리 시작", activePromotions.size());
 
 		// 각 프로모션의 큐 처리
-		for (Promotion promotion : activePromotions) {
+		for (UUID promotionId : activePromotions) {
 			try {
-				Long queueSize = queueService.getQueueSize(promotion.getId());
+				Long queueSize = queueService.getQueueSize(promotionId);
 				if (queueSize > 0) {
-					log.debug("프로모션 {} 큐 처리 - 대기 {}명", promotion.getName(), queueSize);
-					processPromotionQueue(promotion.getId());
+					log.debug("프로모션 {} 큐 처리 - 대기 {}명", promotionId, queueSize);
+					processPromotionQueue(promotionId);
 				}
 			} catch (Exception e) {
-				log.error("프로모션 큐 처리 중 오류 - promotionId: {}, error: {}", promotion.getId(), e.getMessage(), e);
+				log.error("프로모션 큐 처리 중 오류 - promotionId: {}, error: {}", promotionId, e.getMessage(), e);
 			}
 		}
 	}
 
 	public void processPromotionQueue(UUID promotionId) {
 		// 1. 프로모션 조회
-		Promotion promotion = promotionRepository.findById(promotionId)
-			.orElse(null);
+		Promotion promotion = cacheService.getPromotion(promotionId);
 
 		if (promotion == null) {
 			log.warn("프로모션을 찾을 수 없음 - promotionId: {}", promotionId);
