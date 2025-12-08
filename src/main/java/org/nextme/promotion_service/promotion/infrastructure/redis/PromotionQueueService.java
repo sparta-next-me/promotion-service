@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
@@ -112,25 +111,22 @@ public class PromotionQueueService {
 	@param queueData 큐에 저장할 데이터
 	@return ParticipationResult (신규 참여 여부, 큐 크기)
 	 */
-	@SuppressWarnings("unchecked")
 	public ParticipationResult addParticipantWithPipeline(UUID promotionId, UUID userId, String queueData) {
 		String joinedKey = RedisKeyGenerator.joinedKey(promotionId);
 		String queueKey = RedisKeyGenerator.queueKey(promotionId);
 
-		// Serializer 직접 생성
 		StringRedisSerializer stringSerializer = new StringRedisSerializer();
-		RedisSerializer<Object> valueSerializer = (RedisSerializer<Object>) redisTemplate.getValueSerializer();
 
 		// 파이프라인 실행
 		var results = redisTemplate.executePipelined((RedisCallback<Object>)connection -> {
 			connection.setCommands().sAdd(
 				stringSerializer.serialize(joinedKey),
-				valueSerializer.serialize(userId.toString())
+				stringSerializer.serialize(userId.toString())
 			);
 			connection.listCommands().lLen(stringSerializer.serialize(queueKey));
 			connection.listCommands().rPush(
 				stringSerializer.serialize(queueKey),
-				valueSerializer.serialize(queueData)
+				stringSerializer.serialize(queueData)
 			);
 			return null;
 		});
