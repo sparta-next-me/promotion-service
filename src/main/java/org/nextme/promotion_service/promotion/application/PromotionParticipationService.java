@@ -51,18 +51,14 @@ public class PromotionParticipationService {
 			throw PromotionErrorCode.PROMOTION_NOT_AVAILABLE.toException();
 		}
 
-		// 3. 파이프라인 (중복 체크 + 큐 크기 조회 + 큐 삽입)
-		String queueData = String.format("%s:%s:%s:%s", userId, ipAddress, userAgent, LocalDateTime.now());
-		PromotionQueueService.ParticipationResult result =
-			queueService.addParticipantWithPipeline(promotionId, userId, queueData);
-
-		// 4. 중복 참여 체크
-		if (!result.isNewParticipant()) {
+		// 3. 중복 체크 + 참여 기록
+		boolean isNewParticipant = queueService.addToJoinedSet(promotionId, userId);
+		if (!isNewParticipant) {
 			throw PromotionErrorCode.PROMOTION_ALREADY_JOINED.toException();
 		}
 
-		// 5. 대기열 크기 확인
-		Long queueSize = result.getQueueSize();
+		// 4. 대기열 크기 확인
+		Long queueSize = queueService.getQueueSize(promotionId);
 		int maxQueueSize = promotion.getTotalStock() * QUEUE_SIZE_MULTIPLIER;
 
 		if (queueSize >= maxQueueSize) {
@@ -70,6 +66,10 @@ public class PromotionParticipationService {
 			queueService.removeFromJoinedSet(promotionId, userId);
 			throw PromotionErrorCode.PROMOTION_QUEUE_FULL.toException();
 		}
+
+		// 5. 대기열 등록
+		String queueData = String.format("%s:%s:%s:%s", userId, ipAddress, userAgent, LocalDateTime.now());
+		queueService.enqueue(promotionId, queueData);
 
 		// 6. 성공 응답
 		Long position = queueSize + 1;

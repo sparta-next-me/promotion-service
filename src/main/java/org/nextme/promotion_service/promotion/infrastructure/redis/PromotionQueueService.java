@@ -2,9 +2,7 @@ package org.nextme.promotion_service.promotion.infrastructure.redis;
 
 import java.util.UUID;
 
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -102,61 +100,5 @@ public class PromotionQueueService {
 		String joinedKey = RedisKeyGenerator.joinedKey(promotionId);
 		Long count = redisTemplate.opsForSet().size(joinedKey);
 		return count != null ? count : 0L;
-	}
-
-	/*
-	참여 처리 파이프라인 (중복 체크 + 큐 크기 + 큐 삽입)
-	@param promotionId 프로모션 ID
-	@param userId 사용자 ID
-	@param queueData 큐에 저장할 데이터
-	@return ParticipationResult (신규 참여 여부, 큐 크기)
-	 */
-	public ParticipationResult addParticipantWithPipeline(UUID promotionId, UUID userId, String queueData) {
-		String joinedKey = RedisKeyGenerator.joinedKey(promotionId);
-		String queueKey = RedisKeyGenerator.queueKey(promotionId);
-
-		StringRedisSerializer stringSerializer = new StringRedisSerializer();
-
-		// 파이프라인 실행
-		var results = redisTemplate.executePipelined((RedisCallback<Object>)connection -> {
-			connection.setCommands().sAdd(
-				stringSerializer.serialize(joinedKey),
-				stringSerializer.serialize(userId.toString())
-			);
-			connection.listCommands().lLen(stringSerializer.serialize(queueKey));
-			connection.listCommands().rPush(
-				stringSerializer.serialize(queueKey),
-				stringSerializer.serialize(queueData)
-			);
-			return null;
-		});
-
-		// 결과 추출
-		Long addResult = (Long) results.get(0);  // SADD 결과 (1=신규, 0=중복)
-		Long queueSize = (Long) results.get(1);  // LLEN 결과
-
-		return new ParticipationResult(
-			addResult != null && addResult == 1L,
-			queueSize != null ? queueSize : 0L
-		);
-	}
-
-	// 파이프라인 결과
-	public static class ParticipationResult {
-		private final boolean isNewParticipant;
-		private final Long queueSize;
-
-		public ParticipationResult(boolean isNewParticipant, Long queueSize) {
-			this.isNewParticipant = isNewParticipant;
-			this.queueSize = queueSize;
-		}
-
-		public boolean isNewParticipant() {
-			return isNewParticipant;
-		}
-
-		public Long getQueueSize() {
-			return queueSize;
-		}
 	}
 }
