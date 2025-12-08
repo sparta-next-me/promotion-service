@@ -9,7 +9,6 @@ import org.nextme.promotion_service.promotion.infrastructure.persistence.Promoti
 import org.nextme.promotion_service.promotion.infrastructure.redis.PromotionQueueService;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionJoinResponse;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,6 @@ public class PromotionParticipationService {
 	@param ipAddress 사용자 IP 주소
 	@return 참여 결과
 	 */
-	@Transactional(readOnly = true)
 	public PromotionJoinResponse joinPromotion(UUID promotionId, UUID userId, HttpServletRequest httpRequest) {
 
 		// 클라이언트 IP 추출
