@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: ${DB_URL}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 50
@@ -73,3 +73,20 @@ server:
     max-connections: 20000
     threads:
       max: 500
+
+monitoring:
+  enabled: true
+
+  ollama:
+    url: ${AI_URL}
+    model: llama3.2
+    timeout: 30
+
+  notification:
+    service-url: ${NOTIFICATION_SERVICE_URL}
+    slack-user-ids:
+      - ${SLACK_USER_ID}
+
+  schedule:
+    daily-report: "0 0 9 * * *"
+    enabled: false
