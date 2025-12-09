@@ -29,7 +29,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
 		// 프로모션 참여 API에만 Rate Limiting 적용
 		String requestURI = request.getRequestURI();
-		if (!requestURI.matches(".*/v1/promotions/.*/join")) {
+		if (!requestURI.matches("/v1/promotions/.*/join")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
