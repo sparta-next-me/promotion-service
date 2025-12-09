@@ -79,7 +79,7 @@ monitoring:
 
   ollama:
     url: ${AI_URL}
-    model: llama3.2
+    model: exaone3.5
     timeout: 30
 
   notification:
