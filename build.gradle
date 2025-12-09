@@ -50,6 +50,9 @@ dependencies {
 	implementation 'com.bucket4j:bucket4j-core:8.10.1'
 	implementation 'com.bucket4j:bucket4j-redis:8.10.1'
 
+	// OpenFeign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
