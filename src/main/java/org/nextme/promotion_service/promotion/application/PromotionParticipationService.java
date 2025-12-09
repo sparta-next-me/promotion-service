@@ -22,8 +22,8 @@ public class PromotionParticipationService {
 	private final PromotionRepository promotionRepository;
 	private final PromotionQueueService queueService;
 
-	// 대기열 최대 크기 = 선착순 인원 * 5
-	private static final int QUEUE_SIZE_MULTIPLIER = 5;
+	// 대기열 최대 크기 = 선착순 인원 * 100
+	private static final int QUEUE_SIZE_MULTIPLIER = 1000;
 
 	/*
 	프로모션 참여 처리
