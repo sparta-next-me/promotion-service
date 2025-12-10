@@ -84,8 +84,7 @@ monitoring:
 
   notification:
     service-url: ${NOTIFICATION_SERVICE_URL}
-    slack-user-ids:
-      - ${SLACK_USER_ID}
+    slack-user-ids: ${SLACK_USER_ID}
 
   schedule:
     daily-report: "0 0 9 * * *"
