@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class OllamaResponse {
-	private String mode;
+	private String model;
 	private String response;
 	private boolean done;
 }
