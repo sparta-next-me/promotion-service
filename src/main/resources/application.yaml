@@ -16,13 +16,14 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         jdbc:
           batch_size: 50
         order_inserts: true
         order_updates: true
+        format_sql: false
 
   data:
     redis:
@@ -89,3 +90,14 @@ monitoring:
   schedule:
     daily-report: "0 0 9 * * *"
     enabled: false
+
+  anomaly-detection:
+    enabled: true
+    interval: 60000
+    cooldown-minutes: 15
+
+    thresholds:
+      cpu-usage: 80.0
+      memory-usage: 85.0
+      response-time: 1000.0
+      db-connection: 90.0
