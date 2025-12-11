@@ -1,8 +1,8 @@
 package org.nextme.promotion_service.promotion.infrastructure.event;
 
-import org.nextme.promotion_service.global.config.RabbitMQConfig;
+import org.nextme.promotion_service.global.config.KafkaConfig;
 import org.nextme.promotion_service.promotion.domain.event.PromotionWinnerEvent;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -13,16 +13,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PromotionEventPublisher {
 
-	private final RabbitTemplate rabbitTemplate;
+	private final KafkaTemplate<String, PromotionWinnerEvent> kafkaTemplate;
 
 	// 당첨자 이벤트 발행
 	public void publishWinnerEvent(PromotionWinnerEvent event) {
 		try {
-			rabbitTemplate.convertAndSend(
-				RabbitMQConfig.PROMOTION_EXCHANGE,
-				RabbitMQConfig.WINNER_ROUTING_KEY,
-				event
-			);
+			kafkaTemplate.send(KafkaConfig.PROMOTION_WINNER_TOPIC, event.getPromotionId().toString(), event);
 			log.info("당첨 이벤트 발행 성공 - promotionId: {}, userId: {}, position: {}",
 				event.getPromotionId(), event.getUserId(), event.getQueuePosition());
 		} catch (Exception e) {
