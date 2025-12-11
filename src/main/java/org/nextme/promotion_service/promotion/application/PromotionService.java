@@ -10,6 +10,8 @@ import org.nextme.promotion_service.promotion.infrastructure.redis.PromotionQueu
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionCreateRequest;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionResponse;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionStatusResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,21 @@ public class PromotionService {
 		log.info("프로모션 생성 완료 - id: {}, name: {}", saved.getId(), saved.getName());
 
 		return PromotionResponse.from(saved);
+	}
+
+	/*
+	프로모션 목록 조회 (상태별 필터링 가능)
+	@param status 프로모션 상태 (null이면 전체 조회)
+	@param pageable 페이징 정보
+	@return 프로모션 목록
+	 */
+	@Transactional(readOnly = true)
+	public Page<PromotionResponse> getPromotions(PromotionStatus status, Pageable pageable) {
+		Page<Promotion> promotions = (status != null)
+			? promotionRepository.findByStatus(status, pageable)
+			: promotionRepository.findAll(pageable);
+
+		return promotions.map(PromotionResponse::from);
 	}
 
 	/*
