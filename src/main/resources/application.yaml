@@ -7,16 +7,32 @@ spring:
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
 
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
 
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 10
 
   rabbitmq:
     host: ${RABBITMQ_HOST}
@@ -51,3 +67,9 @@ springdoc:
     operations-sorter: alpha
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+
+server:
+  tomcat:
+    max-connections: 20000
+    threads:
+      max: 500
