@@ -1,8 +1,9 @@
 package org.nextme.promotion_service.monitoring.config;
 
+import org.nextme.promotion_service.monitoring.client.GeminiChatModel;
+import org.nextme.promotion_service.monitoring.client.GeminiClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +22,9 @@ public class MonitoringConfig {
 	@Bean
 	@Primary
 	@ConditionalOnProperty(name = "monitoring.ai.provider", havingValue = "gemini")
-	public ChatModel geminiChatModel(VertexAiGeminiChatModel vertexAiGeminiChatModel) {
+	public ChatModel geminiChatModel(GeminiClient geminiClient) {
 		log.info("Using Gemini AI provider");
-		return vertexAiGeminiChatModel;
+		return new GeminiChatModel(geminiClient);
 	}
 
 	@Bean

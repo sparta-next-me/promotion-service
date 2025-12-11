@@ -60,7 +60,6 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
 	// Spring AI
-	implementation 'org.springframework.ai:spring-ai-vertex-ai-gemini-spring-boot-starter'
 	implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
 
 	compileOnly 'org.projectlombok:lombok'

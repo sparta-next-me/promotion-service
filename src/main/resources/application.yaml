@@ -12,6 +12,10 @@ spring:
       minimum-idle: 20
       connection-timeout: 30000
       idle-timeout: 600000
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: promotionservice
 
   jpa:
     hibernate:
@@ -51,23 +55,20 @@ spring:
         spring.json.trusted.packages: "*"
 
   ai:
-    vertex:
-      ai:
-        gemini:
-          project-id: ${GEMINI_PROJECT_ID}
-          location: us-west1
-          chat:
-            options:
-              temperature: 0.7
-
     ollama:
       base-url: ${OLLAMA_URL}
       chat:
         options:
           model: ${OLLAMA_MODEL}
 
+gemini:
+  api-key: ${GEMINI_API_KEY}
+
   flyway:
     enabled: false
+    schemas: promotionservice
+    default-schema: promotionservice
+    baseline-on-migrate: true
 
 management:
   endpoints:
@@ -102,6 +103,7 @@ server:
     max-connections: 20000
     threads:
       max: 500
+  port: 11111
 
 monitoring:
   enabled: true
