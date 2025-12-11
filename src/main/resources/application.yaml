@@ -41,6 +41,24 @@ spring:
     username: ${RABBITMQ_USERNAME}
     password: ${RABBITMQ_PASSWORD}
 
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GEMINI_PROJECT_ID}
+          location: us-central1
+          api-key: ${GEMINI_API_KEY}
+          chat:
+            options:
+              model: ${GEMINI_MODEL}
+              temperature: 0.7
+
+    ollama:
+      base-url: ${OLLAMA_URL}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL}
+
 management:
   endpoints:
     web:
@@ -78,10 +96,8 @@ server:
 monitoring:
   enabled: true
 
-  ollama:
-    url: ${AI_URL}
-    model: exaone3.5
-    timeout: 30
+  ai:
+    provider: gemini
 
   notification:
     service-url: ${NOTIFICATION_SERVICE_URL}

@@ -9,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MonitoringErrorCode {
 
-	// Ollama 관련
-	OLLAMA_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "OLLAMA_CONNECTION_FAILED", "Ollama 서버에 연결할 수 없습니다."),
-	OLLAMA_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OLLAMA_REQUEST_FAILED", "Ollama API 요청이 실패했습니다."),
-	OLLAMA_RESPONSE_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "OLLAMA_RESPONSE_INVALID", "Ollama 응답이 올바르지 않습니다."),
+	// AI 관련
+	AI_CONNECTION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "AI_CONNECTION_FAILED", "AI 서버에 연결할 수 없습니다."),
+	AI_REQUEST_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI_REQUEST_FAILED", "AI API 요청이 실패했습니다."),
+	AI_RESPONSE_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "AI_RESPONSE_INVALID", "AI 응답이 올바르지 않습니다."),
 
 	// Notification Service 관련
 	NOTIFICATION_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "NOTIFICATION_SERVICE_UNAVAILABLE", "알림 서비스를 사용할 수 없습니다."),

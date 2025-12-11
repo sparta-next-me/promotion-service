@@ -1,6 +1,9 @@
 package org.nextme.promotion_service.monitoring.analyzer;
 
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -11,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AIAnalyzer {
 
-	private final OllamaClient ollamaClient;
+	private final ChatModel chatModel;
 
 	public String analyze(SystemMetrics metrics) {
 		log.info("Starting AI analysis for system metrics");
@@ -19,7 +22,8 @@ public class AIAnalyzer {
 		String prompt = buildPrompt(metrics);
 		log.debug("Generated prompt:\n{}", prompt);
 
-		String analysis = ollamaClient.generate(prompt);
+		ChatResponse response = chatModel.call(new Prompt(prompt));
+		String analysis = response.getResult().getOutput().getContent();
 		log.info("AI analysis completed: {} characters", analysis.length());
 
 		return analysis;
