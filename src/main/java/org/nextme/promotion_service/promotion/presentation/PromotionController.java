@@ -12,9 +12,9 @@ import org.nextme.promotion_service.promotion.presentation.dto.PromotionJoinResp
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionResponse;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionStatusResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import feign.Param;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -70,8 +69,12 @@ public class PromotionController {
 	public ResponseEntity<CustomResponse<Page<PromotionResponse>>> getPromotions(
 		@Parameter(description = "프로모션 상태 (SCHEDULED, ACTIVE, ENDED)")
 		@RequestParam(required = false) PromotionStatus status,
-		@PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+		@Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+		@RequestParam(defaultValue = "0") int page,
+		@Parameter(description = "페이지 크기", example = "20")
+		@RequestParam(defaultValue = "20") int size
 	) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 		Page<PromotionResponse> response = promotionService.getPromotions(status, pageable);
 		return ResponseEntity.ok(CustomResponse.onSuccess(response));
 	}
