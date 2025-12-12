@@ -62,6 +62,9 @@ dependencies {
 	// Spring AI
 	implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
 
+	// Eureka
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
