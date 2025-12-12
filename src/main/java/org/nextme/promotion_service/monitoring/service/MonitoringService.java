@@ -3,8 +3,6 @@ package org.nextme.promotion_service.monitoring.service;
 import java.util.List;
 
 import org.nextme.promotion_service.monitoring.analyzer.AIAnalyzer;
-import org.nextme.promotion_service.monitoring.client.NotificationClient;
-import org.nextme.promotion_service.monitoring.client.dto.SlackUserMessageRequest;
 import org.nextme.promotion_service.monitoring.collector.MetricsCollector;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
 import org.nextme.promotion_service.monitoring.event.MonitoringEventPublisher;
