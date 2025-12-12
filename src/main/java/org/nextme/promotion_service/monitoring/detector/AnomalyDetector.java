@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.nextme.promotion_service.monitoring.client.NotificationClient;
-import org.nextme.promotion_service.monitoring.client.dto.SlackUserMessageRequest;
 import org.nextme.promotion_service.monitoring.collector.MetricsCollector;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
+import org.nextme.promotion_service.monitoring.event.MonitoringEventPublisher;
+import org.nextme.promotion_service.monitoring.event.MonitoringNotificationEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AnomalyDetector {
 
 	private final MetricsCollector metricsCollector;
-	private final NotificationClient notificationClient;
+	private final MonitoringEventPublisher eventPublisher;
 
 	@Value("${monitoring.notification.slack-user-ids}")
 	private List<String> slackUserIds;
@@ -128,19 +128,19 @@ public class AnomalyDetector {
 
 		String message = String.format("""
 				🚨 *서버 이상 감지*
-				
+
 				*탐지 시간*: %s
-				
+
 				*감지된 문제*
 				%s
-				
+
 				*현재 메트릭*
 				• CPU 사용률: %.2f%%
 				• 메모리 사용률: %.2f%%
 				• HTTP 평균 응답: %.2fms
 				• HTTP 최대 응답: %.2fms
 				• DB 커넥션: %d/%d
-				
+
 				⚡ 즉시 확인이 필요합니다!
 				""",
 			timestamp,
@@ -154,8 +154,8 @@ public class AnomalyDetector {
 		);
 
 		try {
-			SlackUserMessageRequest request = new SlackUserMessageRequest(slackUserIds, message);
-			notificationClient.sendToUsers(request);
+			MonitoringNotificationEvent event = new MonitoringNotificationEvent(slackUserIds, message);
+			eventPublisher.publishNotification(event);
 			log.info("Urgent alert sent successfully : {} issues detected", alerts.size());
 		} catch (Exception e) {
 			log.error("Failed to send urgent alert", e);

@@ -114,7 +114,6 @@ monitoring:
     provider: gemini
 
   notification:
-    service-url: ${NOTIFICATION_SERVICE_URL}
     slack-user-ids: ${SLACK_USER_ID}
 
   schedule:

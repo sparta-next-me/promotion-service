@@ -5,7 +5,6 @@ import org.nextme.promotion_service.monitoring.client.GeminiClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-@EnableFeignClients(basePackages = "org.nextme.promotion_service.monitoring")
 @EnableScheduling
 @EnableAsync
 public class MonitoringConfig {
