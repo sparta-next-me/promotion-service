@@ -1,6 +1,6 @@
 package org.nextme.promotion_service.monitoring.controller;
 
-import org.nextme.promotion_service.monitoring.scheduler.MonitoringScheduler;
+import org.nextme.promotion_service.monitoring.service.MonitoringService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "monitoring.enabled", havingValue = "true")
 public class MonitoringController {
 
-	private final MonitoringScheduler monitoringScheduler;
+	private final MonitoringService monitoringService;
 
 	// 모니터링 보고서 수동 생성 및 전송
 	@Operation(summary = "보고서 생성", description = "모니터링 보고서를 수동으로 생성 및 전송합니다.")
@@ -28,12 +28,8 @@ public class MonitoringController {
 	public ResponseEntity<String> triggerReport() {
 		log.info("Manual monitoring report triggered via API");
 
-		try {
-			monitoringScheduler.triggerManualReport();
-			return ResponseEntity.ok("Monitoring report generated and sent successfully");
-		} catch (Exception e) {
-			log.error("Failed to generate monitoring report", e);
-			return ResponseEntity.internalServerError().body("Failed to generate report: " + e.getMessage());
-		}
+		monitoringService.generateAndSendReport();
+
+		return ResponseEntity.accepted().body("Monitoring report generation started");
 	}
 }
