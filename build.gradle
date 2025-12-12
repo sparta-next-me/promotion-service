@@ -23,10 +23,12 @@ configurations {
 repositories {
 	mavenCentral()
 	maven { url 'https://jitpack.io' }
+	maven { url 'https://repo.spring.io/milestone' }
 }
 
 ext {
 	set('springCloudVersion', "2025.0.0")
+	set('springAiVersion', "1.0.0-M4")
 }
 
 dependencies {
@@ -40,8 +42,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 
-	// RabbitMQ
-	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	// Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
@@ -49,6 +51,19 @@ dependencies {
 	// Rate Limiting - Bucket4j
 	implementation 'com.bucket4j:bucket4j-core:8.10.1'
 	implementation 'com.bucket4j:bucket4j-redis:8.10.1'
+
+	// OpenFeign
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+	// flyway
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// Spring AI
+	implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
+
+	// Eureka
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -62,6 +77,7 @@ dependencies {
 dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
 	}
 }
 

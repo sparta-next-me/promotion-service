@@ -4,25 +4,32 @@ spring:
 
   datasource:
     url: ${DB_URL}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 50
       minimum-idle: 20
       connection-timeout: 30000
       idle-timeout: 600000
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: promotionservice
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         jdbc:
           batch_size: 50
         order_inserts: true
         order_updates: true
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: promotionservice
 
   data:
     redis:
@@ -34,11 +41,36 @@ spring:
           max-idle: 20
           min-idle: 10
 
-  rabbitmq:
-    host: ${RABBITMQ_HOST}
-    port: ${RABBITMQ_PORT}
-    username: ${RABBITMQ_USERNAME}
-    password: ${RABBITMQ_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      group-id: promotion-service
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "*"
+
+  ai:
+    ollama:
+      base-url: ${OLLAMA_URL}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL}
+
+gemini:
+  api-key: ${GEMINI_API_KEY}
+
+  flyway:
+    enabled: true
+    schemas: promotionservice
+    default-schema: promotionservice
+    baseline-on-migrate: true
 
 management:
   endpoints:
@@ -73,3 +105,39 @@ server:
     max-connections: 20000
     threads:
       max: 500
+  port: 11111
+
+monitoring:
+  enabled: true
+
+  ai:
+    provider: gemini
+
+  notification:
+    service-url: ${NOTIFICATION_SERVICE_URL}
+    slack-user-ids: ${SLACK_USER_ID}
+
+  schedule:
+    daily-report: "0 0 9 * * *"
+    enabled: false
+
+  anomaly-detection:
+    enabled: true
+    interval: 60000
+    cooldown-minutes: 15
+
+    thresholds:
+      cpu-usage: 80.0
+      memory-usage: 85.0
+      response-time: 1000.0
+      db-connection: 90.0
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://34.50.7.8:3150//eureka/
