@@ -28,6 +28,8 @@ spring:
         order_inserts: true
         order_updates: true
         format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: promotionservice
 
   data:
     redis:
@@ -65,7 +67,7 @@ gemini:
   api-key: ${GEMINI_API_KEY}
 
   flyway:
-    enabled: false
+    enabled: true
     schemas: promotionservice
     default-schema: promotionservice
     baseline-on-migrate: true
