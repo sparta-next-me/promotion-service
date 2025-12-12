@@ -7,6 +7,8 @@ import org.nextme.promotion_service.monitoring.client.NotificationClient;
 import org.nextme.promotion_service.monitoring.client.dto.SlackUserMessageRequest;
 import org.nextme.promotion_service.monitoring.collector.MetricsCollector;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
+import org.nextme.promotion_service.monitoring.event.MonitoringEventPublisher;
+import org.nextme.promotion_service.monitoring.event.MonitoringNotificationEvent;
 import org.nextme.promotion_service.monitoring.report.ReportGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +27,7 @@ public class MonitoringService {
 	private final MetricsCollector metricsCollector;
 	private final AIAnalyzer aiAnalyzer;
 	private final ReportGenerator reportGenerator;
-	private final NotificationClient notificationClient;
+	private final MonitoringEventPublisher eventPublisher;
 
 	@Value("${monitoring.notification.slack-user-ids}")
 	private List<String> slackUserIds;
@@ -46,8 +48,8 @@ public class MonitoringService {
 			String report = reportGenerator.generate(metrics, analysis);
 
 			// Slack 전송
-			SlackUserMessageRequest request = new SlackUserMessageRequest(slackUserIds, report);
-			notificationClient.sendToUsers(request);
+			MonitoringNotificationEvent event = new MonitoringNotificationEvent(slackUserIds, report);
+			eventPublisher.publishNotification(event);
 
 			log.info("Monitoring report sent successfully to {} users", slackUserIds.size());
 
