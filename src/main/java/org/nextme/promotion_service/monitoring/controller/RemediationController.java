@@ -2,6 +2,7 @@ package org.nextme.promotion_service.monitoring.controller;
 
 import org.nextme.promotion_service.monitoring.remediation.RemediationAction;
 import org.nextme.promotion_service.monitoring.remediation.RemediationExecutor;
+import org.nextme.promotion_service.monitoring.service.MonitoringService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +14,33 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/monitoring/remediation")
+@RequestMapping("/api/monitoring")
 @RequiredArgsConstructor
 public class RemediationController {
 
 	private final RemediationExecutor remediationExecutor;
+	private final MonitoringService monitoringService;
+
+	/**
+	 * 수동으로 AI 분석 보고서 생성 및 Slack 전송
+	 * 임계치 상관없이 지금 바로 분석 및 알림 전송
+	 *
+	 * @return 분석 완료 메시지
+	 */
+	@PostMapping("/report/manual")
+	public ResponseEntity<String> generateManualReport() {
+		log.info("Manual report generation requested");
+
+		try {
+			monitoringService.generateAndSendReport();
+			return ResponseEntity.ok("✅ AI 분석 보고서 생성 완료. Slack으로 전송됩니다.");
+
+		} catch (Exception e) {
+			log.error("Failed to generate manual report", e);
+			return ResponseEntity.internalServerError()
+				.body("❌ 보고서 생성 실패: " + e.getMessage());
+		}
+	}
 
 	/**
 	 * Remediation 액션 실행
@@ -25,7 +48,7 @@ public class RemediationController {
 	 * @param actionType 실행할 액션 타입 (예: CLEAR_REDIS_CACHE, FORCE_GC, ADJUST_DB_POOL)
 	 * @return 실행 결과 메시지
 	 */
-	@PostMapping("/execute")
+	@PostMapping("/remediation/execute")
 	public ResponseEntity<RemediationResponse> executeRemediation(
 		@RequestParam("actionType") String actionType,
 		@RequestParam(value = "approvedBy", required = false) String approvedBy) {
