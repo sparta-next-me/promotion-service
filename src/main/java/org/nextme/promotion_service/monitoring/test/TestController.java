@@ -28,7 +28,6 @@ public class TestController {
 
 	/**
 	 * 시나리오 1: 메모리 누수 테스트 데이터 주입
-	 * POST /api/test/monitoring/inject-memory-leak
 	 */
 	@PostMapping("/inject-memory-leak")
 	public String injectMemoryLeak() {
@@ -39,7 +38,6 @@ public class TestController {
 
 	/**
 	 * 시나리오 2: CPU 급증 테스트 데이터 주입
-	 * POST /api/test/monitoring/inject-cpu-spike
 	 */
 	@PostMapping("/inject-cpu-spike")
 	public String injectCpuSpike() {
@@ -50,7 +48,6 @@ public class TestController {
 
 	/**
 	 * 테스트 데이터 삭제
-	 * POST /api/test/monitoring/clear
 	 */
 	@PostMapping("/clear")
 	public String clearTestData() {
@@ -60,7 +57,6 @@ public class TestController {
 
 	/**
 	 * 현재 메트릭 확인 및 이상 감지 테스트
-	 * GET /api/test/monitoring/check
 	 */
 	@GetMapping("/check")
 	public String checkAnomaly() {
@@ -98,7 +94,6 @@ public class TestController {
 
 	/**
 	 * 주입된 테스트 데이터로 강제 임계치 초과 시뮬레이션
-	 * POST /api/test/monitoring/simulate-anomaly
 	 */
 	@PostMapping("/simulate-anomaly")
 	public String simulateAnomaly() {
@@ -144,7 +139,6 @@ public class TestController {
 
 	/**
 	 * 테스트 데이터로 강제 AI 분석 실행 (메모리 90% 시나리오)
-	 * POST /api/test/monitoring/trigger-with-test-data
 	 */
 	@PostMapping("/trigger-with-test-data")
 	public String triggerWithTestData() {
@@ -203,7 +197,6 @@ public class TestController {
 
 	/**
 	 * Gemini API 없이 Slack 전송만 테스트
-	 * POST /api/test/monitoring/test-slack-only
 	 */
 	@PostMapping("/test-slack-only")
 	public String testSlackOnly() {
