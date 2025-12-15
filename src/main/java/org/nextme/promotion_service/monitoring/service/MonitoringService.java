@@ -9,7 +9,6 @@ import org.nextme.promotion_service.monitoring.detector.AnomalyDetector;
 import org.nextme.promotion_service.monitoring.event.MonitoringEventPublisher;
 import org.nextme.promotion_service.monitoring.event.MonitoringNotificationEvent;
 import org.nextme.promotion_service.monitoring.history.MetricsHistoryService;
-import org.nextme.promotion_service.monitoring.report.ReportGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
@@ -27,7 +26,6 @@ public class MonitoringService {
 
 	private final MetricsCollector metricsCollector;
 	private final EnhancedAIAnalyzer enhancedAIAnalyzer;
-	private final ReportGenerator reportGenerator;
 	private final MonitoringEventPublisher eventPublisher;
 	private final MetricsHistoryService metricsHistoryService;
 	private final AnomalyDetector anomalyDetector;
@@ -100,20 +98,24 @@ public class MonitoringService {
 	 */
 	private void analyzeAndNotify(SystemMetrics metrics) {
 		try {
-			// 이상 상태 설명 추가
-			String anomalyDescription = anomalyDetector.getAnomalyDescription(metrics);
+			// AI 분석 + 단일 해결방법 제시
+			org.nextme.promotion_service.monitoring.analyzer.AnalysisResult result =
+				enhancedAIAnalyzer.analyzeWithHistory(metrics);
 
-			// Enhanced AI 분석 (과거 데이터와 비교)
-			String analysis = enhancedAIAnalyzer.analyzeWithHistory(metrics);
+			// 간단한 Slack 메시지 생성
+			String message = buildSimpleMessage(result, metrics);
 
-			// 보고서 생성 (이상 설명 + AI 분석)
-			String report = buildAlertReport(anomalyDescription, metrics, analysis);
-
-			// Slack 전송
-			MonitoringNotificationEvent event = new MonitoringNotificationEvent(slackUserIds, report);
+			// 버튼 포함 Slack 전송 (actionType을 actionValue로 전달)
+			MonitoringNotificationEvent event = new MonitoringNotificationEvent(
+				slackUserIds,
+				message,
+				"monitoring_action",
+				result.getActionType()
+			);
 			eventPublisher.publishNotification(event);
 
-			log.info("Alert notification sent successfully to {} users", slackUserIds.size());
+			log.info("Alert notification sent successfully to {} users with action: {}",
+				slackUserIds.size(), result.getActionType());
 
 		} catch (Exception e) {
 			log.error("Failed to analyze and notify", e);
@@ -121,28 +123,52 @@ public class MonitoringService {
 	}
 
 	/**
-	 * 이상 감지 알림 보고서 생성
+	 * 간단한 Slack 메시지 생성 (버튼은 별도로 추가됨)
 	 */
-	private String buildAlertReport(String anomalyDescription, SystemMetrics metrics, String aiAnalysis) {
+	private String buildSimpleMessage(
+		org.nextme.promotion_service.monitoring.analyzer.AnalysisResult result,
+		SystemMetrics metrics) {
+
 		return String.format("""
+				🚨 *시스템 이상 감지*
+
+				📊 *현재 상태*
+				CPU: %.2f%%
+				메모리: %.2f%%
+				HTTP 응답시간: %.2fms
+				DB 커넥션: %d/%d
+
+				*상황 분석*
 				%s
 
-				📊 *현재 메트릭*
-				• CPU: %.2f%%
-				• 메모리: %.2f%%
-				• 응답시간: %.2fms
-				• DB 커넥션: %d/%d
+				*해결 방안*
+				%s
 
-				🤖 *AI 분석 및 권장 조치*
+				*해결 근거*
 				%s
 				""",
-			anomalyDescription,
 			metrics.getCpuUsage(),
 			metrics.getMemoryUsagePercent(),
 			metrics.getHttpRequestMeanTime(),
 			metrics.getDbConnectionActive(),
 			metrics.getDbConnectionMax(),
-			aiAnalysis
+			result.getAnalysis(),
+			result.getRecommendation(),
+			result.getReason()
 		);
+	}
+
+	/**
+	 * 테스트용 알림 발송 (Gemini API 없이 Kafka + Slack 연동 테스트)
+	 */
+	public void publishTestNotification(MonitoringNotificationEvent event) {
+		log.info("Publishing test notification to Kafka...");
+		try {
+			eventPublisher.publishNotification(event);
+			log.info("Test notification published successfully");
+		} catch (Exception e) {
+			log.error("Failed to publish test notification", e);
+			throw new RuntimeException("Test notification failed", e);
+		}
 	}
 }

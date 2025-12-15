@@ -56,8 +56,8 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	implementation 'org.flywaydb:flyway-database-postgresql'
 
-	// Spring AI
-	implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
+	// Spring AI - OpenAI
+	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
 
 	// Eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'

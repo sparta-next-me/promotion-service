@@ -71,4 +71,20 @@ public class RemediationAction {
 			return displayName;
 		}
 	}
+
+	/**
+	 * Action Type 문자열로부터 RemediationAction 생성
+	 */
+	public static RemediationAction of(String actionTypeString) {
+		try {
+			ActionType type = ActionType.valueOf(actionTypeString);
+			return RemediationAction.builder()
+				.type(type)
+				.description(type.getDisplayName())
+				.priority(1)
+				.build();
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
 }

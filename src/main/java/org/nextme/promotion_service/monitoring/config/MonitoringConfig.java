@@ -1,36 +1,21 @@
 package org.nextme.promotion_service.monitoring.config;
 
-import org.nextme.promotion_service.monitoring.client.GeminiChatModel;
-import org.nextme.promotion_service.monitoring.client.GeminiClient;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 모니터링 설정
+ * - Spring AI의 OpenAiChatModel을 자동으로 빈으로 등록 (spring-ai-openai-spring-boot-starter)
+ * - GeminiClient는 OpenAiChatModel을 주입받아서 사용
+ */
 @Slf4j
 @Configuration
 @EnableScheduling
 @EnableAsync
 public class MonitoringConfig {
-
-	@Bean
-	@Primary
-	@ConditionalOnProperty(name = "monitoring.ai.provider", havingValue = "gemini")
-	public ChatModel geminiChatModel(GeminiClient geminiClient) {
-		log.info("Using Gemini AI provider");
-		return new GeminiChatModel(geminiClient);
-	}
-
-	@Bean
-	@ConditionalOnProperty(name = "monitoring.ai.provider", havingValue = "ollama")
-	public ChatModel ollamaChatModel(OllamaChatModel ollamaChatModel) {
-		log.info("Using Ollama AI provider");
-		return ollamaChatModel;
-	}
+	// OpenAiChatModel은 Spring Boot AutoConfiguration으로 자동 등록됨
 }
+
