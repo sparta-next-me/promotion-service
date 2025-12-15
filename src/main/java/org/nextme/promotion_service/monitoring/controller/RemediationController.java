@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/monitoring")
+@RequestMapping("/v1/promotions/monitoring")
 @RequiredArgsConstructor
 public class RemediationController {
 

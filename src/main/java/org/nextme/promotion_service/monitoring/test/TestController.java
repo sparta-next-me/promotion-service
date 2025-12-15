@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/test/monitoring")
+@RequestMapping("/v1/promotions/test/monitoring")
 @RequiredArgsConstructor
 public class TestController {
 
