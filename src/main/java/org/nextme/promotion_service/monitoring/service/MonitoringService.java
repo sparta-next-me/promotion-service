@@ -5,6 +5,7 @@ import java.util.List;
 import org.nextme.promotion_service.monitoring.analyzer.EnhancedAIAnalyzer;
 import org.nextme.promotion_service.monitoring.collector.MetricsCollector;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
+import org.nextme.promotion_service.monitoring.detector.AnomalyDetector;
 import org.nextme.promotion_service.monitoring.event.MonitoringEventPublisher;
 import org.nextme.promotion_service.monitoring.event.MonitoringNotificationEvent;
 import org.nextme.promotion_service.monitoring.history.MetricsHistoryService;
@@ -12,6 +13,7 @@ import org.nextme.promotion_service.monitoring.report.ReportGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -28,38 +30,119 @@ public class MonitoringService {
 	private final ReportGenerator reportGenerator;
 	private final MonitoringEventPublisher eventPublisher;
 	private final MetricsHistoryService metricsHistoryService;
+	private final AnomalyDetector anomalyDetector;
 
 	@Value("${monitoring.notification.slack-user-ids}")
 	private List<String> slackUserIds;
 
-	// 모니터링 보고서를 생성하고 Slack으로 전송합니다.
+	@Value("${monitoring.anomaly-detection.enabled:true}")
+	private boolean anomalyDetectionEnabled;
+
+	/**
+	 * 1분마다 메트릭 수집 및 이상 감지
+	 * - 메트릭은 항상 Redis에 저장 (이력 관리용)
+	 * - 임계치 초과 시에만 AI 분석 + Slack 알림
+	 */
+	@Scheduled(fixedRate = 60000)  // 1분마다 실행
+	public void collectAndCheckAnomaly() {
+		log.info("Starting metrics collection and anomaly detection...");
+
+		try {
+			// 1) 메트릭 수집
+			SystemMetrics metrics = metricsCollector.collect();
+
+			// 2) 메트릭 히스토리 저장 (항상 저장)
+			metricsHistoryService.saveMetrics(metrics);
+			log.info("Metrics saved to history");
+
+			// 3) 이상 감지 체크
+			if (anomalyDetectionEnabled && anomalyDetector.isAnomalyDetected(metrics)) {
+				log.warn("Anomaly detected! Triggering AI analysis and notification...");
+
+				// 이상 감지 시에만 AI 분석 + Slack 전송
+				analyzeAndNotify(metrics);
+			} else {
+				log.info("No anomaly detected. Metrics within normal range.");
+			}
+
+		} catch (Exception e) {
+			log.error("Failed to collect metrics or detect anomaly", e);
+		}
+	}
+
+	/**
+	 * 일일 보고서 생성 (스케줄러에서 호출)
+	 * anomaly-detection과 별개로 정해진 시간에 보고서 전송
+	 */
 	@Async
 	public void generateAndSendReport() {
-		log.info("Starting monitoring report generation...");
+		log.info("Starting scheduled daily report generation...");
 
 		try {
 			// 메트릭 수집
 			SystemMetrics metrics = metricsCollector.collect();
 
-			// 메트릭 히스토리 저장 (Redis)
+			// 메트릭 히스토리 저장
 			metricsHistoryService.saveMetrics(metrics);
 			log.info("Metrics saved to history");
 
-			// Enhanced AI 분석 (과거 데이터와 비교)
-			String analysis = enhancedAIAnalyzer.analyzeWithHistory(metrics);
-
-			// 보고서 생성
-			String report = reportGenerator.generate(metrics, analysis);
-
-			// Slack 전송
-			MonitoringNotificationEvent event = new MonitoringNotificationEvent(slackUserIds, report);
-			eventPublisher.publishNotification(event);
-
-			log.info("Monitoring report sent successfully to {} users", slackUserIds.size());
+			// AI 분석 + Slack 전송
+			analyzeAndNotify(metrics);
 
 		} catch (Exception e) {
 			log.error("Failed to generate or send monitoring report", e);
 			throw new RuntimeException("Monitoring report generation failed", e);
 		}
+	}
+
+	/**
+	 * AI 분석 및 Slack 알림 전송 (공통 로직)
+	 */
+	private void analyzeAndNotify(SystemMetrics metrics) {
+		try {
+			// 이상 상태 설명 추가
+			String anomalyDescription = anomalyDetector.getAnomalyDescription(metrics);
+
+			// Enhanced AI 분석 (과거 데이터와 비교)
+			String analysis = enhancedAIAnalyzer.analyzeWithHistory(metrics);
+
+			// 보고서 생성 (이상 설명 + AI 분석)
+			String report = buildAlertReport(anomalyDescription, metrics, analysis);
+
+			// Slack 전송
+			MonitoringNotificationEvent event = new MonitoringNotificationEvent(slackUserIds, report);
+			eventPublisher.publishNotification(event);
+
+			log.info("Alert notification sent successfully to {} users", slackUserIds.size());
+
+		} catch (Exception e) {
+			log.error("Failed to analyze and notify", e);
+		}
+	}
+
+	/**
+	 * 이상 감지 알림 보고서 생성
+	 */
+	private String buildAlertReport(String anomalyDescription, SystemMetrics metrics, String aiAnalysis) {
+		return String.format("""
+				%s
+
+				📊 *현재 메트릭*
+				• CPU: %.2f%%
+				• 메모리: %.2f%%
+				• 응답시간: %.2fms
+				• DB 커넥션: %d/%d
+
+				🤖 *AI 분석 및 권장 조치*
+				%s
+				""",
+			anomalyDescription,
+			metrics.getCpuUsage(),
+			metrics.getMemoryUsagePercent(),
+			metrics.getHttpRequestMeanTime(),
+			metrics.getDbConnectionActive(),
+			metrics.getDbConnectionMax(),
+			aiAnalysis
+		);
 	}
 }
