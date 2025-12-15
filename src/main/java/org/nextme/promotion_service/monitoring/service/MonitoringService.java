@@ -2,11 +2,12 @@ package org.nextme.promotion_service.monitoring.service;
 
 import java.util.List;
 
-import org.nextme.promotion_service.monitoring.analyzer.AIAnalyzer;
+import org.nextme.promotion_service.monitoring.analyzer.EnhancedAIAnalyzer;
 import org.nextme.promotion_service.monitoring.collector.MetricsCollector;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
 import org.nextme.promotion_service.monitoring.event.MonitoringEventPublisher;
 import org.nextme.promotion_service.monitoring.event.MonitoringNotificationEvent;
+import org.nextme.promotion_service.monitoring.history.MetricsHistoryService;
 import org.nextme.promotion_service.monitoring.report.ReportGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,9 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 public class MonitoringService {
 
 	private final MetricsCollector metricsCollector;
-	private final AIAnalyzer aiAnalyzer;
+	private final EnhancedAIAnalyzer enhancedAIAnalyzer;
 	private final ReportGenerator reportGenerator;
 	private final MonitoringEventPublisher eventPublisher;
+	private final MetricsHistoryService metricsHistoryService;
 
 	@Value("${monitoring.notification.slack-user-ids}")
 	private List<String> slackUserIds;
@@ -39,8 +41,12 @@ public class MonitoringService {
 			// 메트릭 수집
 			SystemMetrics metrics = metricsCollector.collect();
 
-			// AI 분석
-			String analysis = aiAnalyzer.analyze(metrics);
+			// 메트릭 히스토리 저장 (Redis)
+			metricsHistoryService.saveMetrics(metrics);
+			log.info("Metrics saved to history");
+
+			// Enhanced AI 분석 (과거 데이터와 비교)
+			String analysis = enhancedAIAnalyzer.analyzeWithHistory(metrics);
 
 			// 보고서 생성
 			String report = reportGenerator.generate(metrics, analysis);
