@@ -106,16 +106,21 @@ public class MonitoringService {
 			String message = buildSimpleMessage(result, metrics);
 
 			// 버튼 포함 Slack 전송 (actionType을 actionValue로 전달)
+			String actionType = result.getActionType();
+			log.warn("🔥 Creating event with actionType: {} (not null: {})", actionType, actionType != null);
+
 			MonitoringNotificationEvent event = new MonitoringNotificationEvent(
 				slackUserIds,
 				message,
 				"monitoring_action",
-				result.getActionType()
+				actionType
 			);
+
+			log.warn("🔥 Event created: actionId={}, actionValue={}", "monitoring_action", actionType);
 			eventPublisher.publishNotification(event);
 
 			log.info("Alert notification sent successfully to {} users with action: {}",
-				slackUserIds.size(), result.getActionType());
+				slackUserIds.size(), actionType);
 
 		} catch (Exception e) {
 			log.error("Failed to analyze and notify", e);

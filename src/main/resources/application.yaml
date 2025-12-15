@@ -48,6 +48,8 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
       retries: 3
+      properties:
+        spring.json.add.type.headers: true
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -57,14 +59,12 @@ spring:
         spring.json.trusted.packages: "*"
 
   ai:
-    ollama:
-      base-url: ${OLLAMA_URL}
+    openai:
+      api-key: ${OPENAI_API_KEY}
       chat:
+        model: gpt-4-turbo
         options:
-          model: ${OLLAMA_MODEL}
-
-gemini:
-  api-key: ${GEMINI_API_KEY}
+          temperature: 0.3
 
   flyway:
     enabled: true
@@ -137,7 +137,7 @@ monitoring:
     thresholds:
       cpu-usage: 80.0
       memory-usage: 85.0
-      response-time: 1000.0
+      response-time: 100.0
       db-connection: 90.0
 
 eureka:
