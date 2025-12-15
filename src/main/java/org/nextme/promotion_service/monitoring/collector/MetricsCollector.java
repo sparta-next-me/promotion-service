@@ -5,9 +5,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.util.concurrent.TimeUnit;
 
-import org.nextme.infrastructure.exception.ApplicationException;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
-import org.nextme.promotion_service.monitoring.exception.MonitoringErrorCode;
 import org.springframework.stereotype.Component;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -68,11 +66,7 @@ public class MetricsCollector {
 
 		} catch (Exception e) {
 			log.error("Failed to collect metrics", e);
-			throw new ApplicationException(
-				MonitoringErrorCode.METRICS_COLLECTION_FAILED.getHttpStatus(),
-				MonitoringErrorCode.METRICS_COLLECTION_FAILED.getCode(),
-				"메트릭 수집 중 오류가 발생했습니다: " + e.getMessage()
-			);
+			throw new RuntimeException("메트릭 수집 중 오류가 발생했습니다: " + e.getMessage(), e);
 		}
 	}
 

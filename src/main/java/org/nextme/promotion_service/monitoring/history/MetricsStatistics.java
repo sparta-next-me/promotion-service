@@ -1,24 +1,31 @@
 package org.nextme.promotion_service.monitoring.history;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
- * 메트릭 통계 DTO
+ * 메트릭 통계 정보
  */
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MetricsStatistics {
 
-	private final double avgCpu;
-	private final double maxCpu;
-	private final double minCpu;
-	private final double avgMemory;
-	private final double maxMemory;
-	private final double avgResponseTime;
-	private final double maxResponseTime;
-	private final int dataPoints;
+	private double avgCpu;
+	private double maxCpu;
+	private double minCpu;
+	private double avgMemory;
+	private double maxMemory;
+	private double avgResponseTime;
+	private double maxResponseTime;
+	private int dataPoints;
 
+	/**
+	 * 빈 통계 객체 생성
+	 */
 	public static MetricsStatistics empty() {
 		return MetricsStatistics.builder()
 			.avgCpu(0.0)
