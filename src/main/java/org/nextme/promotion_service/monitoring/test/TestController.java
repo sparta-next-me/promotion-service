@@ -205,15 +205,7 @@ public class TestController {
 		try {
 			// 간단한 테스트 메시지
 			String testMessage = """
-				🧪 **Slack 연동 테스트**
-
-				이 메시지가 도착했다면 Kafka + Slack 연동이 정상 작동합니다!
-
-				📊 테스트 시나리오:
-				• 메모리: 90% (임계치 85% 초과)
-				• CPU: 55%
-
-				✅ 다음 단계: OpenAI API 키 설정 후 AI 분석 테스트
+				Slack 연동 테스트
 				""";
 
 			// Kafka 이벤트 발행
