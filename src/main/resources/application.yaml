@@ -136,8 +136,8 @@ monitoring:
 
     thresholds:
       cpu-usage: 80.0
-      memory-usage: 85.0
-      response-time: 100.0
+      memory-usage: 88.0
+      response-time: 200.0
       db-connection: 90.0
 
 eureka:

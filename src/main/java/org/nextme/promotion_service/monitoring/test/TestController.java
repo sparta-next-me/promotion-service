@@ -213,7 +213,7 @@ public class TestController {
 				• 메모리: 90% (임계치 85% 초과)
 				• CPU: 55%
 
-				✅ 다음 단계: Gemini API 키 설정 후 AI 분석 테스트
+				✅ 다음 단계: OpenAI API 키 설정 후 AI 분석 테스트
 				""";
 
 			// Kafka 이벤트 발행
