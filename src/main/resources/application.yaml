@@ -2,6 +2,14 @@ spring:
   application:
     name: promotion-service
 
+  config:
+    import: "optional:configserver:http://34.50.7.8:3100"
+  cloud:
+    config:
+      enabled: true
+      discovery:
+        enabled: false
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
