@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +50,7 @@ public class PromotionController {
 	@param request 프로모션 생성 요청
 	@return 생성된 프로모션 정보
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@Operation(summary = "프로모션 생성", description = "새로운 프로모션을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<CustomResponse<PromotionResponse>> createPromotion(

@@ -8,10 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableJpaAuditing
 @ComponentScan(basePackages = {
-	"org.nextme.promotion_service",
-	"org.nextme.infrastructure"
+	"org.nextme"
 })
 public class PromotionServiceApplication {
 
