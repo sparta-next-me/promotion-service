@@ -3,7 +3,7 @@ spring:
     name: promotion-service
 
   config:
-    import: "optional:configserver:http://34.50.7.8:3100"
+    import: "optional:configserver:${CONFIG_SERVER_URL}"
   cloud:
     config:
       enabled: true
