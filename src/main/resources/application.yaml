@@ -2,6 +2,14 @@ spring:
   application:
     name: promotion-service
 
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL}"
+  cloud:
+    config:
+      enabled: true
+      discovery:
+        enabled: false
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -135,7 +143,7 @@ monitoring:
     cooldown-minutes: 15
 
     thresholds:
-      cpu-usage: 80.0
+      cpu-usage: 95.0
       memory-usage: 80.0
       response-time: 2000.0
       db-connection: 90.0

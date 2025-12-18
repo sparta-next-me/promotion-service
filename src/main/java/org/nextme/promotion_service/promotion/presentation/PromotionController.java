@@ -2,12 +2,12 @@ package org.nextme.promotion_service.promotion.presentation;
 
 import java.util.UUID;
 
+import org.nextme.common.security.UserPrincipal;
 import org.nextme.infrastructure.success.CustomResponse;
 import org.nextme.promotion_service.promotion.application.PromotionParticipationService;
 import org.nextme.promotion_service.promotion.application.PromotionService;
 import org.nextme.promotion_service.promotion.domain.PromotionStatus;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionCreateRequest;
-import org.nextme.promotion_service.promotion.presentation.dto.PromotionJoinRequest;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionJoinResponse;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionResponse;
 import org.nextme.promotion_service.promotion.presentation.dto.PromotionStatusResponse;
@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +51,7 @@ public class PromotionController {
 	@param request 프로모션 생성 요청
 	@return 생성된 프로모션 정보
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@Operation(summary = "프로모션 생성", description = "새로운 프로모션을 생성합니다.")
 	@PostMapping
 	public ResponseEntity<CustomResponse<PromotionResponse>> createPromotion(
@@ -100,6 +103,7 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 시작된 프로모션 정보
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@Operation(summary = "프로모션 시작", description = "프로모션을 ACTIVE 상태로 변경합니다.")
 	@PatchMapping("/{promotionId}/start")
 	public ResponseEntity<CustomResponse<PromotionResponse>> startPromotion(
@@ -115,6 +119,7 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 종료된 프로모션 정보
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@Operation(summary = "프로모션 종료", description = "프로모션을 ENDED 상태로 변경합니다.")
 	@PatchMapping("/{promotionId}/end")
 	public ResponseEntity<CustomResponse<PromotionResponse>> endPromotion(
@@ -130,6 +135,7 @@ public class PromotionController {
 	@param promotionId 프로모션 ID
 	@return 참여 현황 정보
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@Operation(summary = "프로모션 참여 현황 조회", description = "대기열 크기, 참여자 수, 당첨자 수 등의 현황을 조회합니다.")
 	@GetMapping("/{promotionId}/status")
 	public ResponseEntity<CustomResponse<PromotionStatusResponse>> getPromotionStatus(
@@ -151,10 +157,13 @@ public class PromotionController {
 	public ResponseEntity<CustomResponse<PromotionJoinResponse>> joinPromotion(
 		@Parameter(description = "프로모션 ID", required = true)
 		@PathVariable UUID promotionId,
-		@Valid @RequestBody PromotionJoinRequest request,
-		HttpServletRequest httpRequest
+		HttpServletRequest httpRequest,
+		@AuthenticationPrincipal UserPrincipal userPrincipal
 	) {
-		PromotionJoinResponse response = participationService.joinPromotion(promotionId, request.userId(), httpRequest);
+		PromotionJoinResponse response = participationService.joinPromotion(
+			promotionId,
+			UUID.fromString(userPrincipal.userId()),
+			httpRequest);
 		return ResponseEntity.ok(CustomResponse.onSuccess(response));
 	}
 }

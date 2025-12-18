@@ -4,6 +4,7 @@ import org.nextme.promotion_service.monitoring.collector.MetricsCollector;
 import org.nextme.promotion_service.monitoring.collector.dto.SystemMetrics;
 import org.nextme.promotion_service.monitoring.detector.AnomalyDetector;
 import org.nextme.promotion_service.monitoring.service.MonitoringService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,7 @@ public class TestController {
 	/**
 	 * 시나리오 1: 메모리 누수 테스트 데이터 주입
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/inject-memory-leak")
 	public String injectMemoryLeak() {
 		log.info("=== Starting Memory Leak Scenario Test ===");
@@ -39,6 +41,7 @@ public class TestController {
 	/**
 	 * 시나리오 2: CPU 급증 테스트 데이터 주입
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/inject-cpu-spike")
 	public String injectCpuSpike() {
 		log.info("=== Starting CPU Spike Scenario Test ===");
@@ -49,6 +52,7 @@ public class TestController {
 	/**
 	 * 테스트 데이터 삭제
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/clear")
 	public String clearTestData() {
 		testDataInjector.clearTestData();
@@ -58,6 +62,7 @@ public class TestController {
 	/**
 	 * 현재 메트릭 확인 및 이상 감지 테스트
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@GetMapping("/check")
 	public String checkAnomaly() {
 		SystemMetrics metrics = metricsCollector.collect();
@@ -95,6 +100,7 @@ public class TestController {
 	/**
 	 * 주입된 테스트 데이터로 강제 임계치 초과 시뮬레이션
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/simulate-anomaly")
 	public String simulateAnomaly() {
 		log.info("=== Simulating anomaly with test data ===");
@@ -130,6 +136,7 @@ public class TestController {
 	 * 강제로 모니터링 실행 (실제 서버 메트릭 사용)
 	 * POST /api/test/monitoring/trigger
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/trigger")
 	public String triggerMonitoring() {
 		log.info("=== Manually triggering monitoring with REAL metrics ===");
@@ -140,6 +147,7 @@ public class TestController {
 	/**
 	 * 테스트 데이터로 강제 AI 분석 실행 (메모리 90% 시나리오)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/trigger-with-test-data")
 	public String triggerWithTestData() {
 		log.info("=== Triggering monitoring with TEST DATA (Memory 90%) ===");
@@ -198,6 +206,7 @@ public class TestController {
 	/**
 	 * Gemini API 없이 Slack 전송만 테스트
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping("/test-slack-only")
 	public String testSlackOnly() {
 		log.info("=== Testing Slack notification without AI ===");
