@@ -2,13 +2,18 @@ spring:
   application:
     name: promotion-service
 
-  config:
-    import: "optional:configserver:${CONFIG_SERVER_URL}"
-  cloud:
+#  config:
+#    import: "optional:configserver:${CONFIG_SERVER_URL}"
+#  cloud:
+#    config:
+#      enabled: true
+#      discovery:
+#        enabled: false
+  spring:
     config:
-      enabled: true
-      discovery:
-        enabled: false
+      # 쿠버네티스 내부 컨피그 서버 서비스 주소
+      import: 'optional:configserver:http://config-server.next-me.svc.cluster.local:3100'
+
 
   datasource:
     url: ${DB_URL}
@@ -148,12 +153,19 @@ monitoring:
       response-time: 2000.0
       db-connection: 90.0
 
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: ${EUREKA_URL}
 eureka:
   instance:
     prefer-ip-address: true
-
   client:
-    register-with-eureka: true
-    fetch-registry: true
     service-url:
-      defaultZone: ${EUREKA_URL}
+      # 쿠버네티스 내부 유레카 서비스 주소
+      defaultZone: http://eureka-server.next-me.svc.cluster.local:3151/eureka/
