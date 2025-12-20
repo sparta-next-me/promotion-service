@@ -24,28 +24,27 @@ spec:
         - name: ghcr-cred
       containers:
         - name: promotion-service
-          # 이미지 경로는 프로젝트 설정에 맞게 수정하세요
           image: ghcr.io/sparta-next-me/promotion-service:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 13000 # 프로모션 서비스의 포트 (예: 13000)
+            - containerPort: 13000
 
           envFrom:
             - secretRef:
-                name: promotion-service-env # 프로모션용 시크릿 필요
+                name: promotion-service-env
 
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
             - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
               value: "true"
+            - name: SPRING_CONFIG_IMPORT
+              value: "optional:configserver:http://config-server.next-me.svc.cluster.local:3100"
+            - name: SPRING_CLOUD_CONFIG_NAME
+              value: "promotion-service"
             - name: JAVA_OPTS
               value: "-Xms512m -Xmx768m"
-            # RabbitMQ를 사용하지 않거나 아직 설정 전이라면 헬스체크 제외 (선택 사항)
-            - name: MANAGEMENT_HEALTH_RABBIT_ENABLED
-              value: "false"
 
-          # 유저 서비스 경험을 바탕으로 넉넉하게 설정된 Probe
           readinessProbe:
             httpGet:
               path: /actuator/health
@@ -64,8 +63,8 @@ spec:
               cpu: "200m"
               memory: "512Mi"
             limits:
-              cpu: "1000m"     # 초기 구동 속도 확보
-              memory: "1Gi"    # OOM(Out Of Memory) 방지를 위해 1Gi 유지
+              cpu: "1000m"
+              memory: "1Gi"
 ---
 apiVersion: v1
 kind: Service
@@ -77,6 +76,6 @@ spec:
     app: promotion-service
   ports:
     - name: http
-      port: 13000      # 서비스 포트
-      targetPort: 13000 # 컨테이너 내부 포트
+      port: 13000
+      targetPort: 13000
   type: ClusterIP
