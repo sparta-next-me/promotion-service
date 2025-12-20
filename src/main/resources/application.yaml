@@ -9,9 +9,9 @@ spring:
 #      enabled: true
 #      discovery:
 #        enabled: false
-    config:
-      # 쿠버네티스 내부 컨피그 서버 서비스 주소
-      import: 'optional:configserver:http://config-server.next-me.svc.cluster.local:3100'
+  config:
+    # 쿠버네티스 내부 컨피그 서버 서비스 주소
+    import: 'optional:configserver:http://config-server.next-me.svc.cluster.local:3100'
 
 
   datasource:
