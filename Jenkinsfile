@@ -28,7 +28,7 @@ pipeline {
             steps {
                 // Jenkins에 등록된 promotion-service 전용 .env 파일을 사용하여 빌드
                 withCredentials([
-                    file(credentialsId: 'promotion-service-env-file', variable: 'ENV_FILE')
+                    file(credentialsId: 'promotion-env', variable: 'ENV_FILE')
                 ]) {
                     sh '''
                       # .env 파일을 환경변수로 로드하여 테스트 및 JAR 빌드 수행
@@ -68,7 +68,7 @@ pipeline {
                 // K3s 설정파일과 프로모션 전용 .env 파일을 사용하여 배포
                 withCredentials([
                     file(credentialsId: 'k3s-kubeconfig', variable: 'KUBECONFIG_FILE'),
-                    file(credentialsId: 'promotion-service-env-file', variable: 'ENV_FILE')
+                    file(credentialsId: 'promotion-env', variable: 'ENV_FILE')
                 ]) {
                     sh '''
                       export KUBECONFIG=${KUBECONFIG_FILE}
