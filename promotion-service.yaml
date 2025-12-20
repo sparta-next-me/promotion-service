@@ -27,7 +27,7 @@ spec:
           image: ghcr.io/sparta-next-me/promotion-service:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 13000
+            - containerPort: 11111 # 실제 앱 포트로 수정
 
           envFrom:
             - secretRef:
@@ -45,17 +45,18 @@ spec:
             - name: JAVA_OPTS
               value: "-Xms512m -Xmx768m"
 
+          # [핵심 수정] 포트를 11111로 맞추고 대기 시간을 로그 기반으로 조정
           readinessProbe:
             httpGet:
               path: /actuator/health
-              port: 13000
-            initialDelaySeconds: 150
+              port: 11111
+            initialDelaySeconds: 80 # 구동 성공(94초) 직전부터 체크 시작
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /actuator/health
-              port: 13000
-            initialDelaySeconds: 200
+              port: 11111
+            initialDelaySeconds: 120 # 충분히 안정화된 후 체크
             periodSeconds: 20
 
           resources:
@@ -76,6 +77,6 @@ spec:
     app: promotion-service
   ports:
     - name: http
-      port: 13000
-      targetPort: 13000
+      port: 11111      # 서비스 포트
+      targetPort: 11111 # 컨테이너 포트
   type: ClusterIP
