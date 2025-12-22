@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promotion-service
+  namespace: next-me
+  labels:
+    app: promotion-service
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  selector:
+    matchLabels:
+      app: promotion-service
+  template:
+    metadata:
+      labels:
+        app: promotion-service
+    spec:
+      imagePullSecrets:
+        - name: ghcr-cred
+      containers:
+        - name: promotion-service
+          image: ghcr.io/sparta-next-me/promotion-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 11111 # 실제 앱 포트로 수정
+
+          envFrom:
+            - secretRef:
+                name: promotion-service-env
+
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+            - name: SPRING_CONFIG_IMPORT
+              value: "optional:configserver:http://config-server.next-me.svc.cluster.local:3100"
+            - name: SPRING_CLOUD_CONFIG_NAME
+              value: "promotion-service"
+            - name: JAVA_OPTS
+              value: "-Xms512m -Xmx768m"
+
+          # [핵심 수정] 포트를 11111로 맞추고 대기 시간을 로그 기반으로 조정
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 11111
+            initialDelaySeconds: 80 # 구동 성공(94초) 직전부터 체크 시작
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 11111
+            initialDelaySeconds: 120 # 충분히 안정화된 후 체크
+            periodSeconds: 20
+
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: promotion-service
+  namespace: next-me
+spec:
+  selector:
+    app: promotion-service
+  ports:
+    - name: http
+      port: 11111      # 서비스 포트
+      targetPort: 11111 # 컨테이너 포트
+  type: ClusterIP
